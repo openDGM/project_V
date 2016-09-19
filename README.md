@@ -25,3 +25,8 @@ where N is the order of the element, dx is width
 of the element and a is advection speed. E.g. for
 N=4 and number of elements=4 and a=1 the time step
 would need to be dt < PI/18 ~= 0.15s
+
+The program will write an output to "output.dat"
+with the first line containing the coordinates and 
+the second line containing the function values at 
+the final time step.
