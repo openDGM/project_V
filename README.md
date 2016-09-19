@@ -1,6 +1,6 @@
 # project_V
 This has been a small learning project of mine
-to study the Nodal Discontinous Galerking scheme
+to study the Nodal Discontinuous Galerking scheme
 to solve initial-boundary value problems. The
 implementation follows chapter 3 of the book
 Nodal Discontinuous Galerkin Methods Algorithms, 
