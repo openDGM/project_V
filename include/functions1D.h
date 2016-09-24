@@ -20,6 +20,9 @@
 #define EIGEN_MPL2_ONLY
 #include <tuple>
 
+#ifndef FUNCTIONS1D_H
+#define FUNCTIONS1D_H
+
 using namespace Eigen;
 
 namespace functions1D{
@@ -58,3 +61,4 @@ VectorXd LocalX1D(const ArrayXd& r, double XLeft, double XRight);
 inline double a(int n, int alpha, int beta);
 inline double b(int n, int alpha, int beta);
 }
+#endif
