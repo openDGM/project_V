@@ -25,13 +25,13 @@ using namespace Eigen;
 namespace functions2D{
 
 // return jacobi polynomial of Nth order evaluated at locations r
-ArrayXd jacobiP2D(const ArrayXd& r, const ArrayXd& s, int alpha, int beta, int N);
+ArrayXd jacobiP2D(const ArrayXd& r, const ArrayXd& s, int alpha, int beta, int N, int M);
 
 // return gradient in r-direction of 2D jacobi polynomial of Nth order evaluated at locations r,s
-VectorXd GradRJacobiP2D(const VectorXd& r, const ArrayXd & s, int alpha, int beta, int N);
+VectorXd GradRJacobiP2D(const VectorXd& r, const ArrayXd & s, int alpha, int beta, int N, int M);
 
 // return gradient in s-direction of 2D jacobi polynomial of Nth order evaluated at locations r,s
-VectorXd GradSJacobiP2D(const VectorXd& r, const ArrayXd & s, int alpha, int beta, int N);
+VectorXd GradSJacobiP2D(const VectorXd& r, const ArrayXd & s, int alpha, int beta, int N, int M);
 
 // return the Vandermonde matrix for the Nth order reference element 
 MatrixXd Vandermonde2D(int N, const VectorXd& r, const VectorXd& s);
