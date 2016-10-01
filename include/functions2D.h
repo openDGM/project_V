@@ -15,6 +15,7 @@
  */
 
 #include <Eigen/Dense>
+#include <Eigen/SparseCore>
 #define EIGEN_MPL2_ONLY
 
 #ifndef FUNCTIONS2D_H
@@ -43,9 +44,9 @@ MatrixXd GradRVandermonde2D(int N, const VectorXd& r, const VectorXd& s);
 MatrixXd GradSVandermonde2D(int N, const VectorXd& r, const VectorXd& s);
 
 // return Differentiation matrix/operator for the Nth order reference element
-MatrixXd DRMatrix2D(int N, const VectorXd& r, const VectorXd& s, const MatrixXd& V2D);
+SparseMatrix<double> DRMatrix2D(int N, const VectorXd& r, const VectorXd& s);
 
 // return Differentiation matrix/operator for the Nth order reference element
-MatrixXd DSMatrix2D(int N, const VectorXd& r, const VectorXd& s, const MatrixXd& V2D);
+SparseMatrix<double> DSMatrix2D(int N, const VectorXd& r, const VectorXd& s);
 }
 #endif

@@ -8,6 +8,7 @@
 #include "functions1D.h"
 #include "functions2D.h"
 #define EIGEN_MPL2_ONLY
+#define epsilon 1e-10 
 
 #include <cmath>
 #include <algorithm>
@@ -21,25 +22,28 @@ using namespace functions2D;
 
 ArrayXd functions2D::jacobiP2D(const ArrayXd& r, const ArrayXd& s, int alpha, int beta, int N, int M)
 {
-    ArrayXd jp2D(r.size()*s.size());
+    // 2D Jacobi polynomial constructed from orthorgonal 1D Jacobi polynomials
+    ArrayXd jacobi2D(r.size()*s.size());
 
-    ArrayXd jpr = jacobiP(r,alpha,beta,N);
-    ArrayXd jps = jacobiP(s,alpha,beta,M);
+    // 1D polynomials in r and s direction
+    ArrayXd jacobiPr = jacobiP(r,alpha,beta,N);
+    ArrayXd jacobiPs = jacobiP(s,alpha,beta,M);
 
+    // Tensor product of the 1D polynomials construct 2D polynomial. Column major?
     for (int i=0; i<r.size(); ++i)
     {
         for(int j=0; j<s.size(); ++j)
         {
-            jp2D[i*(r.size())+j] = jpr[i]*jps[j];
+            jacobi2D[i*(r.size())+j] = jacobiPr[i]*jacobiPs[j];
         }
     }
 
-    return jp2D;
+    return jacobi2D;
 }
 
 VectorXd functions2D::GradRJacobiP2D(const VectorXd& r, const ArrayXd& s, int alpha, int beta, int N, int M)
 {
-    // Zero order jacobi polynomial
+    // N Zero order jacobi polynomial
     //-------------------------------------------------------------------------------------------------------
     if (N==0)
     {
@@ -47,28 +51,30 @@ VectorXd functions2D::GradRJacobiP2D(const VectorXd& r, const ArrayXd& s, int al
     }
     //-------------------------------------------------------------------------------------------------------
 
-    // Nth order jacobi polynomial
+    // N,Mth order jacobi polynomial
     //-------------------------------------------------------------------------------------------------------
-    ArrayXd jp2drgrad(r.size()*s.size());
+    ArrayXd jacobi2DGradR(r.size()*s.size());
 
-    ArrayXd jprgrad = sqrt(N*(N+alpha+beta+1))*jacobiP(r,alpha+1,beta+1,N-1);
-    ArrayXd jps = jacobiP(s,alpha,beta,M);
+    ArrayXd jacobiPGradR = sqrt(N*(N+alpha+beta+1))*jacobiP(r,alpha+1,beta+1,N-1);
+    ArrayXd jacobiPS = jacobiP(s,alpha,beta,M);
 
+    // Tensor product of gradient polynomial in r and polynomial in s form 2D gradient in r of order N,M
+    // polynomial 
     for (int i=0; i<r.size(); ++i)
     {
         for (int j=0; j<s.size(); ++j)
         {
-            jp2drgrad[i*(r.size())+j] = jprgrad[i]*jps[j];
+            jacobi2DGradR[i*(r.size())+j] = jacobiPGradR[i]*jacobiPS[j];
         }
     }
 
-    return jp2drgrad;
+    return jacobi2DGradR;
     //-------------------------------------------------------------------------------------------------------
 }
 
 VectorXd functions2D::GradSJacobiP2D(const VectorXd& r, const ArrayXd& s, int alpha, int beta, int N, int M)
 {
-    // Zero order jacobi polynomial
+    // M Zero order jacobi polynomial
     //-------------------------------------------------------------------------------------------------------
     if (M==0)
     {
@@ -76,22 +82,25 @@ VectorXd functions2D::GradSJacobiP2D(const VectorXd& r, const ArrayXd& s, int al
     }
     //-------------------------------------------------------------------------------------------------------
 
-    // Nth order jacobi polynomial
+    // N,Mth order jacobi polynomial
     //-------------------------------------------------------------------------------------------------------
-    ArrayXd jp2dsgrad(r.size()*s.size());
+    ArrayXd jacobi2DGradS(r.size()*s.size());
 
-    ArrayXd jpsgrad = sqrt(M*(M+alpha+beta+1))*jacobiP(s,alpha+1,beta+1,M-1);
-    ArrayXd jpr = jacobiP(r,alpha,beta,N);
+    ArrayXd jacobiPGradS = sqrt(M*(M+alpha+beta+1))*jacobiP(s,alpha+1,beta+1,M-1);
+    ArrayXd jacobiPR = jacobiP(r,alpha,beta,N);
 
+
+    // Tensor product of gradient polynomial in r and polynomial in s form 2D gradient in r of order N,M
+    // polynomial 
     for (int i=0; i<r.size(); ++i)
     {
         for (int j=0; j<s.size(); ++j)
         {
-            jp2dsgrad[i*(r.size())+j] = jpr[i]*jpsgrad[j];
+            jacobi2DGradS[i*(r.size())+j] = jacobiPR[i]*jacobiPGradS[j];
         }
     }
 
-    return jp2dsgrad;
+    return jacobi2DGradS;
     //-------------------------------------------------------------------------------------------------------
 }
 
@@ -135,9 +144,9 @@ MatrixXd functions2D::GradSVandermonde2D(int N, const VectorXd& r, const VectorX
     // Create the GradVandermonde matrix that contains the gradients of base functions of the reference 
     // element as columns
     //-------------------------------------------------------------------------------------------------------
-    for (int i=0; i<N+1; i++)
+    for (int i=0; i<N+1; ++i)
     {
-        for (int j=0; j<N+1; j++)
+        for (int j=0; j<N+1; ++j)
         {
             DVs.col(i*(N+1)+j) = GradSJacobiP2D(r,s,0,0,i,j);
         }
@@ -146,20 +155,62 @@ MatrixXd functions2D::GradSVandermonde2D(int N, const VectorXd& r, const VectorX
     return DVs;
 }
 
-MatrixXd functions2D::DRMatrix2D(int N, const VectorXd& r, const VectorXd& s, const MatrixXd& V2D)
+SparseMatrix<double> functions2D::DRMatrix2D(int N, const VectorXd& r, const VectorXd& s)
 {
-    auto DVr = GradRVandermonde2D(N,r,s);
+    int S = (N+1)*(N+1);
+  
     // Create the differentiation operator of the reference element
+    auto DVr = GradRVandermonde2D(N,r,s);
+    auto V2D = Vandermonde2D(N,r,s);
+    auto Dr = DVr*V2D.inverse();
+
+    // Make operator sparse
     //-------------------------------------------------------------------------------------------------------
-    return DVr*V2D.inverse();
+    vector<Triplet<double>> triplets;
+    SparseMatrix<double> ret(S,S);
+
+    // Find non-zero entries
+    for (int i=0; i<S; ++i)
+    {
+        for (int j=0; j<S; ++j)
+        {
+            if(abs(Dr(i,j)) > epsilon) triplets.push_back(Triplet<double>(i,j,Dr(i,j)));
+        }
+    }
+ 
+    // Set sparse matrix values
+    ret.setFromTriplets(triplets.begin(),triplets.end());
+
+    return ret;
     //-------------------------------------------------------------------------------------------------------
 }
 
-MatrixXd functions2D::DSMatrix2D(int N, const VectorXd& r, const VectorXd& s, const MatrixXd& V2D)
+SparseMatrix<double> functions2D::DSMatrix2D(int N, const VectorXd& r, const VectorXd& s)
 {
-    auto DVs = GradSVandermonde2D(N,r,s);
+    int S = (N+1)*(N+1);
+
     // Create the differentiation operator of the reference element
+    auto DVs = GradSVandermonde2D(N,r,s);
+    auto V2D = Vandermonde2D(N,r,s);
+    auto Ds = DVs*V2D.inverse();
+
+    // Make operator sparse
     //-------------------------------------------------------------------------------------------------------
-    return DVs*V2D.inverse();
+    vector<Triplet<double>> triplets;
+    SparseMatrix<double> ret(S,S);
+
+    // Find non-zero entries
+    for (int i=0; i<S; ++i)
+    {
+        for (int j=0; j<S; ++j)
+        {
+            if(abs(Ds(i,j)) > epsilon) triplets.push_back(Triplet<double>(i,j,Ds(i,j)));
+        }
+    }
+
+    // Set sparse matrix values
+    ret.setFromTriplets(triplets.begin(),triplets.end());
+
+    return ret;
     //-------------------------------------------------------------------------------------------------------
 }
