@@ -70,4 +70,53 @@ class element
   // Return grid
   VectorXd getX();
 };
+
+class element2D
+{
+  private:
+  int       itsN;
+  edge2D*   itsLEdge;
+  edge2D*   itsREdge;
+  edge2D*   itsTEdge;
+  edge2D*   itsBEdge;
+
+  VectorXd  itsLFlux,itsRFlux,itsTFlux,itsBFlux;
+  pair<double,double> itsXYBL, itsXYBR, itsXYTL, itsXYTR;
+  Vector2d  itsLNormal, itsRNormal, itsTNormal, itsBNormal;
+
+  VectorXd itsU;                   // solution of the nodal element
+  VectorXd itsX;                   // global coordinates of the nodal element
+  VectorXd itsY;
+  VectorXd itsRHSU;                // right hand side of PDE
+  VectorXd itsRESU;                // Runge-Kutta residual
+  VectorXd itsDXDR;                // Jacobian of the nodal element
+  VectorXd itsDXDS;
+  VectorXd itsDYDR;
+  VectorXd itsDYDS;
+
+  public:
+  element ();
+  element (pair<double,double> theXYBL, pair<double,double> theXYBR, pair<double,double> theXYTL, pair<double,double> theXYTR, Vector2d theLNormal, Vector2d theRNormal, Vector2d theTNormal, Vector2d theBNormal, int theN);
+
+  void updateFluxes();
+  void avecRHS(const Vector2d a);
+  void advecRK2D(const int INTRK, const double dt);
+
+  Map<VectorXd> connectToLeftBound();
+  Map<VectorXd> connectToRightBound();
+  Map<VectorXd> connectToTopBound();
+  Map<VectorXd> connectToBottomBound();
+
+  void setLEdge(edge2D* theLEdge);
+  void setREdge(edge2D* theREdge);
+  void setTEdge(edge2D* theTEdge);
+  void setBEdge(edge2D* theBEdge);
+
+  void setU(const VectorXd &theU);
+
+  VectorXd getU();
+  VectorXd getX();
+  VectorXd getY();
+
+};
 #endif
