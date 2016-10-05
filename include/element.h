@@ -7,8 +7,8 @@
 
 /*
  * Description:
- * A Class to represent a nodal element.
- * Class encapsulates local grid and the 
+ * Classes to represent a nodal elements.
+ * Classes encapsulate local grid and the 
  * solution of the element as well as 
  * advection procedures.
  */
@@ -75,42 +75,46 @@ class element2D
 {
   private:
   int       itsN;
-  edge2D*   itsLEdge;
-  edge2D*   itsREdge;
-  edge2D*   itsTEdge;
-  edge2D*   itsBEdge;
+  edge2D*   itsLeftEdge;
+  edge2D*   itsRightEdge;
+  edge2D*   itsTopEdge;
+  edge2D*   itsBottomEdge;
 
-  VectorXd  itsLFlux,itsRFlux,itsTFlux,itsBFlux;
-  pair<double,double> itsXYBL, itsXYBR, itsXYTL, itsXYTR;
-  Vector2d  itsLNormal, itsRNormal, itsTNormal, itsBNormal;
+  VectorXd  itsLeftFlux,itsRightFlux,itsTopFlux,itsBottomFlux;
+  pair<double,double> itsBottomLeft, itsBottomRight, itsTopLeft, itsTopRight;
+  Vector2d  itsLeftNormal, itsRightNormal, itsTopNormal, itsBottomNormal;
 
   VectorXd itsU;                   // solution of the nodal element
   VectorXd itsX;                   // global coordinates of the nodal element
   VectorXd itsY;
   VectorXd itsRHSU;                // right hand side of PDE
   VectorXd itsRESU;                // Runge-Kutta residual
-  VectorXd itsDXDR;                // Jacobian of the nodal element
-  VectorXd itsDXDS;
-  VectorXd itsDYDR;
-  VectorXd itsDYDS;
+  VectorXd itsDXDR;                // dxdr Jacobian of the nodal element
+  VectorXd itsDXDS;                // dxds Jacobian of the nodal element
+  VectorXd itsDYDR;                // dydr Jacobian of the nodal element
+  VectorXd itsDYDS;                // dyds Jacobian of the nodal element
 
   public:
-  element ();
-  element (pair<double,double> theXYBL, pair<double,double> theXYBR, pair<double,double> theXYTL, pair<double,double> theXYTR, Vector2d theLNormal, Vector2d theRNormal, Vector2d theTNormal, Vector2d theBNormal, int theN);
+  element2D ();
+  element2D (pair<double,double> theBottomLeft, pair<double,double> theBottomRight, 
+             pair<double,double> theTopLeft, pair<double,double> theTopRight, 
+             Vector2d theLeftNormal, Vector2d theRightNormal, 
+             Vector2d theTopNormal, Vector2d theBottomNormal, 
+             int theN);
 
   void updateFluxes();
   void avecRHS(const Vector2d a);
   void advecRK2D(const int INTRK, const double dt);
 
-  Map<VectorXd> connectToLeftBound();
-  Map<VectorXd> connectToRightBound();
-  Map<VectorXd> connectToTopBound();
-  Map<VectorXd> connectToBottomBound();
+  Map<VectorXd,0,InnerStride<>> connectToLeftBound();
+  Map<VectorXd,0,InnerStride<>> connectToRightBound();
+  Map<VectorXd,0,InnerStride<>> connectToTopBound();
+  Map<VectorXd,0,InnerStride<>> connectToBottomBound();
 
-  void setLEdge(edge2D* theLEdge);
-  void setREdge(edge2D* theREdge);
-  void setTEdge(edge2D* theTEdge);
-  void setBEdge(edge2D* theBEdge);
+  void setLEdge(edge2D* theLeftEdge);
+  void setREdge(edge2D* theRightEdge);
+  void setTEdge(edge2D* theTopEdge);
+  void setBEdge(edge2D* theBottomEdge);
 
   void setU(const VectorXd &theU);
 

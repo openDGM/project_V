@@ -8,6 +8,7 @@
 #include "element.h"
 #include "globals.h"
 #include "functions1D.h"
+#include "functions2D.h"
 
 using namespace Eigen;
 using namespace globals;

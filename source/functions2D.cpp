@@ -29,7 +29,7 @@ ArrayXd functions2D::jacobiP2D(const ArrayXd& r, const ArrayXd& s, int alpha, in
     ArrayXd jacobiPr = jacobiP(r,alpha,beta,N);
     ArrayXd jacobiPs = jacobiP(s,alpha,beta,M);
 
-    // Tensor product of the 1D polynomials construct 2D polynomial. Column major?
+    // Tensor product of the 1D polynomials construct 2D polynomial.
     for (int i=0; i<r.size(); ++i)
     {
         for(int j=0; j<s.size(); ++j)
