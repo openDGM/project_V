@@ -214,3 +214,37 @@ SparseMatrix<double> functions2D::DSMatrix2D(int N, const VectorXd& r, const Vec
     return ret;
     //-------------------------------------------------------------------------------------------------------
 }
+
+VectorXd functions2D::LocalX2D(const ArrayXd& r, pair<double,double> BottomLeft, pair<double,double> TopRight)
+{
+    int N = r.size();
+    VectorXd x = LocalX1D(r,BottomLeft.first,TopRight.first);
+    VectorXd ret(N*N);
+
+    for (int i=0;i<N;++i)
+    {
+        for (int j=0;j<N;++j)
+        {
+            ret[i*N+j] = x[i];
+        }
+    }
+
+    return ret;
+}
+
+VectorXd functions2D::LocalY2D(const ArrayXd& s, pair<double,double> BottomLeft, pair<double,double> TopRight)
+{
+    int N = s.size();
+    VectorXd y = LocalX1D(s,BottomLeft.second,TopRight.second);
+    VectorXd ret(N*N);
+
+    for (int i=0;i<N;++i)
+    {
+        for (int j=0;j<N;++j)
+        {
+            ret[i*N+j] = y[j];
+        }
+    }
+
+    return ret;
+}

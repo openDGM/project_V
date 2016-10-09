@@ -103,7 +103,7 @@ class element2D
              int theN);
 
   void updateFluxes();
-  void avecRHS(const Vector2d a);
+  void advecRHS(const Vector2d a);
   void advecRK2D(const int INTRK, const double dt);
 
   Map<VectorXd,0,InnerStride<>> connectToLeftBound();
@@ -111,10 +111,10 @@ class element2D
   Map<VectorXd,0,InnerStride<>> connectToTopBound();
   Map<VectorXd,0,InnerStride<>> connectToBottomBound();
 
-  void setLEdge(edge2D* theLeftEdge);
-  void setREdge(edge2D* theRightEdge);
-  void setTEdge(edge2D* theTopEdge);
-  void setBEdge(edge2D* theBottomEdge);
+  void setLeftEdge(edge2D* theLeftEdge);
+  void setRightEdge(edge2D* theRightEdge);
+  void setTopEdge(edge2D* theTopEdge);
+  void setBottomEdge(edge2D* theBottomEdge);
 
   void setU(const VectorXd &theU);
 

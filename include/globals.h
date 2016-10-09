@@ -21,6 +21,10 @@ namespace globals
   extern MatrixXd Dr;          // Differentiation operator
   extern MatrixXd Lift;        // Surface flux integral operator
 
+  extern MatrixXd V2D;
+  extern MatrixXd DVs;
+  extern MatrixXd Ds;
+
   // 4th order Runge-Kutta coefficients
   const double rk4a[5] = {0.0,
                            -567301805773.0/1357537059087.0,

@@ -43,11 +43,11 @@ element2D::element2D(pair<double,double> theBottomLeft, pair<double,double> theB
   }
 
 void element2D::updateFluxes()
-  {
+  {/*
     itsLeftFlux = itsLeftEdge->Flux(itsLeftNormal);
     itsRightFlux = itsRightEdge->Flux(itsRightNormal);
     itsBottomFlux = itsBottomEdge->Flux(itsBottomNormal);
-    itsTopFlux = itsTopEdge->Flux(itsTopNormal);
+    itsTopFlux = itsTopEdge->Flux(itsTopNormal);*/
   }
 
 Map<VectorXd,0,InnerStride<>> element2D::connectToLeftBound()
@@ -67,26 +67,26 @@ Map<VectorXd,0,InnerStride<>> element2D::connectToTopBound()
 
 Map<VectorXd,0,InnerStride<>> element2D::connectToBottomBound()
   {
-    return Map<VectorXd,0,InnerStride<>>(itsU.data()+ItsN*(itsN+1),itsN+1,InnerStride<>(1));
+    return Map<VectorXd,0,InnerStride<>>(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
   }
 
 
-void element2D::setLeftEdge(edge* theLeftEdge)
+void element2D::setLeftEdge(edge2D* theLeftEdge)
   {
     itsLeftEdge = theLeftEdge;
   }
 
-void element2D::setRightEdge(edge* theRightEdge)
+void element2D::setRightEdge(edge2D* theRightEdge)
   {
     itsRightEdge = theRightEdge;
   }
 
-void element2D::setTopEdge(edge* theTopEdge)
+void element2D::setTopEdge(edge2D* theTopEdge)
   {
     itsTopEdge = theTopEdge;
   }
 
-void element2D::setBottomEdge(edge* theBottomEdge)
+void element2D::setBottomEdge(edge2D* theBottomEdge)
   {
     itsBottomEdge = theBottomEdge;
   }
@@ -97,10 +97,10 @@ void element2D::setU(const VectorXd &theU)
   }
 
 void element2D::advecRHS(const Vector2d a)
-  {
+  {/*
     Vector2d du(-a*itsU[0]+itsLFlux*itsLNormal,a*itsU[itsN]-itsRFlux*itsRNormal);
 
-    itsRHSU = -a/itsJ.array()*(globals::Dr*itsU).array() + (globals::Lift*du).array()/itsJ.array();
+    itsRHSU = -a/itsJ.array()*(globals::Dr*itsU).array() + (globals::Lift*du).array()/itsJ.array();*/
   }
 
 void element2D::advecRK2D(const int INTRK, const double dt)
@@ -119,7 +119,7 @@ VectorXd element2D::getX()
     return itsX;
   }
 
-VectorXd elemendt2D::getY()
+VectorXd element2D::getY()
   {
     return itsY;
   }

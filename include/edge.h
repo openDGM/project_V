@@ -23,23 +23,45 @@ using namespace Eigen;
 
 class edge
 {
-  private:
-  double itsFlux;
-  double* itsLValue;
-  double* itsRValue;
+    private:
+    double itsFlux;
+    double* itsLValue;
+    double* itsRValue;
   
-  double itsNormal;
+    double itsNormal;
 
-  public:
-  edge();
+    public:
+    edge();
 
-  // Construct a new edge from pointers to left and right value and a edge normal
-  edge(double* theLValue, double* theRValue, double theNormal);
+    // Construct a new edge from pointers to left and right value and a edge normal
+    edge(double* theLValue, double* theRValue, double theNormal);
 
-  // Solve Riemann problem at the edge
-  void evaluateFlux(const double a);
+    // Solve Riemann problem at the edge
+    void evaluateFlux(const double a);
 
-  // Return flux
-  double Flux(double theNormal);
+    // Return flux
+    double Flux(double theNormal);
+};
+
+class edge2D
+{
+    private:
+    VectorXd itsFlux;
+    Map<VectorXd,0,InnerStride<>> itsLValue;
+    Map<VectorXd,0,InnerStride<>> itsRValue;
+
+    Vector2d itsNormal;
+
+    public:
+    edge2D();
+
+    // Construct a new edge from map to left and right value and a edge normal
+    edge2D(Map<VectorXd,0,InnerStride<>> theLValue, Map<VectorXd,0,InnerStride<>> theRValue, Vector2d theNormal);
+
+    // Solve Riemann problem at the edge
+    void evaluateFlux(const Vector2d a);
+
+    // Return flux
+    double Flux(Vector2d theNormal);
 };
 #endif 

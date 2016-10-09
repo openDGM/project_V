@@ -4,7 +4,7 @@ CXXFLAGS = -std=c++11
 
 all : build/bin/openDGM
 
-build/bin/openDGM : build/obj/functions2D.o build/obj/functions1D.o build/obj/edge.o build/obj/element.o
+build/bin/openDGM : build/obj/functions2D.o build/obj/functions1D.o build/obj/edge.o build/obj/element.o build/obj/element2D.o
 	mkdir -p build/bin
 	g++ $(CXXFLAGS) -I$(IDIR) -I$(EIGDIR) build/obj/functions1D.o build/obj/edge.o build/obj/element.o main.cpp -o $@
 
@@ -15,6 +15,10 @@ build/obj/edge.o : source/edge.cpp
 build/obj/element.o : source/element.cpp
 	mkdir -p build/obj
 	g++ -c $(CXXFLAGS) -I$(IDIR) -I$(EIGDIR) source/element.cpp -o $@
+
+build/obj/element2D.o : source/element2D.cpp
+	mkdir -p build/obj
+	g++ -c $(CXXFLAGS) -I$(IDIR) -I$(EIGDIR) source/element2D.cpp -o $@
 
 build/obj/functions1D.o : source/functions1D.cpp
 	mkdir -p build/obj
