@@ -23,6 +23,8 @@
 using namespace Eigen;
 using namespace std;
 
+typedef Map<VectorXd,0,InnerStride<>> EdgeMap;
+
 class element
 {
   private:
@@ -106,10 +108,10 @@ class element2D
   void advecRHS(const Vector2d a);
   void advecRK2D(const int INTRK, const double dt);
 
-  Map<VectorXd,0,InnerStride<>> connectToLeftBound();
-  Map<VectorXd,0,InnerStride<>> connectToRightBound();
-  Map<VectorXd,0,InnerStride<>> connectToTopBound();
-  Map<VectorXd,0,InnerStride<>> connectToBottomBound();
+  unique_ptr<EdgeMap> connectToLeftBound();
+  unique_ptr<EdgeMap> connectToRightBound();
+  unique_ptr<EdgeMap> connectToTopBound();
+  unique_ptr<EdgeMap> connectToBottomBound();
 
   void setLeftEdge(edge2D* theLeftEdge);
   void setRightEdge(edge2D* theRightEdge);

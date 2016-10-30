@@ -14,12 +14,16 @@
  */
 
 #include <Eigen/Dense>
+#include <memory>
 #define EIGEN_MPL2_ONLY
 
 #ifndef EDGE_H
 #define EDGE_H
 
+using namespace std;
 using namespace Eigen;
+
+typedef Map<VectorXd,0,InnerStride<>> EdgeMap;
 
 class edge
 {
@@ -47,8 +51,8 @@ class edge2D
 {
     private:
     VectorXd itsFlux;
-    Map<VectorXd,0,InnerStride<>> itsLValue;
-    Map<VectorXd,0,InnerStride<>> itsRValue;
+    unique_ptr<EdgeMap> itsLValue;
+    unique_ptr<EdgeMap> itsRValue;
 
     Vector2d itsNormal;
 
@@ -56,12 +60,12 @@ class edge2D
     edge2D();
 
     // Construct a new edge from map to left and right value and a edge normal
-    edge2D(Map<VectorXd,0,InnerStride<>> theLValue, Map<VectorXd,0,InnerStride<>> theRValue, Vector2d theNormal);
+    edge2D(unique_ptr<EdgeMap> theLValue, unique_ptr<EdgeMap> theRValue, Vector2d theNormal);
 
     // Solve Riemann problem at the edge
     void evaluateFlux(const Vector2d a);
 
     // Return flux
-    double Flux(Vector2d theNormal);
+    VectorXd Flux(Vector2d theNormal);
 };
 #endif 

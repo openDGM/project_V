@@ -30,7 +30,7 @@ element2D::element2D(pair<double,double> theBottomLeft, pair<double,double> theB
   itsRightNormal(theRightNormal),
   itsTopNormal(theTopNormal),
   itsBottomNormal(theBottomNormal),
-  itsN(theN) 
+  itsN(theN)
   {
     itsX = LocalX2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
     itsY = LocalY2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
@@ -43,33 +43,36 @@ element2D::element2D(pair<double,double> theBottomLeft, pair<double,double> theB
   }
 
 void element2D::updateFluxes()
-  {/*
+  {
     itsLeftFlux = itsLeftEdge->Flux(itsLeftNormal);
     itsRightFlux = itsRightEdge->Flux(itsRightNormal);
     itsBottomFlux = itsBottomEdge->Flux(itsBottomNormal);
-    itsTopFlux = itsTopEdge->Flux(itsTopNormal);*/
+    itsTopFlux = itsTopEdge->Flux(itsTopNormal);
   }
 
-Map<VectorXd,0,InnerStride<>> element2D::connectToLeftBound()
+unique_ptr<EdgeMap> element2D::connectToLeftBound()
   {
-    return Map<VectorXd,0,InnerStride<>>(itsU.data(),itsN+1,InnerStride<>(itsN+1));
+    EdgeMap tmp(itsU.data(),itsN+1,InnerStride<>(itsN+1));
+    return make_unique<EdgeMap>(tmp);
   }
 
-Map<VectorXd,0,InnerStride<>> element2D::connectToRightBound()
+unique_ptr<EdgeMap> element2D::connectToRightBound()
   {
-    return Map<VectorXd,0,InnerStride<>>(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
+    EdgeMap tmp(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
+    return make_unique<EdgeMap>(tmp);
   }
 
-Map<VectorXd,0,InnerStride<>> element2D::connectToTopBound()
+unique_ptr<EdgeMap> element2D::connectToTopBound()
   {
-    return Map<VectorXd,0,InnerStride<>>(itsU.data(),itsN+1,InnerStride<>(1));
+    EdgeMap tmp(itsU.data(),itsN+1,InnerStride<>(1));
+    return make_unique<EdgeMap>(tmp);
   }
 
-Map<VectorXd,0,InnerStride<>> element2D::connectToBottomBound()
+unique_ptr<EdgeMap> element2D::connectToBottomBound()
   {
-    return Map<VectorXd,0,InnerStride<>>(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
+    EdgeMap tmp(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
+    return make_unique<EdgeMap>(tmp);
   }
-
 
 void element2D::setLeftEdge(edge2D* theLeftEdge)
   {
