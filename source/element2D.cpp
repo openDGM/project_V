@@ -35,10 +35,10 @@ element2D::element2D(pair<double,double> theBottomLeft, pair<double,double> theB
   {
     itsX = LocalX2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
     itsY = LocalY2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
-    itsDXDR = Jacobian(itsX,Dr2D);
-    itsDXDS = Jacobian(itsX,Ds2D);
-    itsDYDR = Jacobian(itsY,Dr2D);
-    itsDYDS = Jacobian(itsY,Ds2D);
+    itsDXDR = operators2D::DDr(itsN,itsX);
+    itsDXDS = operators2D::DDs(itsN,itsX);
+    itsDYDR = operators2D::DDr(itsN,itsY);
+    itsDYDS = operators2D::DDs(itsN,itsY);
     itsJ = itsDXDR.array()*itsDYDS.array() - itsDXDS.array()*itsDYDR.array();
     itsRESU = VectorXd::Zero((itsN+1)*(itsN+1));
     itsU = VectorXd::Zero((itsN+1)*(itsN+1));
@@ -110,9 +110,13 @@ void element2D::advecRHS(const Vector2d a)
           (R*a.transpose() - itsRightFlux.transpose())*itsRightNormal,
           (B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal;
 
-    itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*(globals::Dr2D*itsU).array()-a[0]*itsDYDR.array()/(-itsJ.array())*(globals::Ds2D*itsU).array()
+    /*itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*(globals::Dr2D*itsU).array()-a[0]*itsDYDR.array()/(-itsJ.array())*(globals::Ds2D*itsU).array()
               -a[1]*itsDXDS.array()/(-itsJ.array())*(globals::Dr2D*itsU).array()-a[1]*itsDXDR.array()/itsJ.array()*(globals::Ds2D*itsU).array()
+              +(globals::Lift2D*du).array()/itsJ.array();*/
+    itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*operators2D::DDr(itsN,itsU)-a[0]*itsDYDR.array()/(-itsJ.array())*operators2D::DDs(itsN,itsU)
+              -a[1]*itsDXDS.array()/(-itsJ.array())*operators2D::DDr(itsN,itsU)-a[1]*itsDXDR.array()/itsJ.array()*operators2D::DDs(itsN,itsU)
               +(globals::Lift2D*du).array()/itsJ.array();
+
   }
 
 void element2D::advecRK2D(const int INTRK, const double dt)
