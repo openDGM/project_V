@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "functions1D.h"
 #include "functions2D.h"
+#include <iostream>
 
 using namespace Eigen;
 using namespace globals;
@@ -34,44 +35,41 @@ element2D::element2D(pair<double,double> theBottomLeft, pair<double,double> theB
   {
     itsX = LocalX2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
     itsY = LocalY2D(jacobiGL(0,0,itsN),itsBottomLeft,itsTopRight);
-    itsDXDR = Jacobian(itsX,Dr);
-    itsDXDS = Jacobian(itsX,Ds);
-    itsDYDR = Jacobian(itsY,Dr);
-    itsDYDS = Jacobian(itsY,Ds);
+    itsDXDR = Jacobian(itsX,Dr2D);
+    itsDXDS = Jacobian(itsX,Ds2D);
+    itsDYDR = Jacobian(itsY,Dr2D);
+    itsDYDS = Jacobian(itsY,Ds2D);
+    itsJ = itsDXDR.array()*itsDYDS.array() - itsDXDS.array()*itsDYDR.array();
     itsRESU = VectorXd::Zero((itsN+1)*(itsN+1));
     itsU = VectorXd::Zero((itsN+1)*(itsN+1));
   }
 
 void element2D::updateFluxes()
   {
-    itsLeftFlux = itsLeftEdge->Flux(itsLeftNormal);
-    itsRightFlux = itsRightEdge->Flux(itsRightNormal);
-    itsBottomFlux = itsBottomEdge->Flux(itsBottomNormal);
-    itsTopFlux = itsTopEdge->Flux(itsTopNormal);
+    itsLeftFlux = itsLeftEdge->Flux2D();
+    itsRightFlux = itsRightEdge->Flux2D();
+    itsBottomFlux = itsBottomEdge->Flux2D();
+    itsTopFlux = itsTopEdge->Flux2D();
   }
 
 unique_ptr<EdgeMap> element2D::connectToLeftBound()
   {
-    EdgeMap tmp(itsU.data(),itsN+1,InnerStride<>(itsN+1));
-    return make_unique<EdgeMap>(tmp);
+    return make_unique<EdgeMap>(itsU.data(),itsN+1,InnerStride<>(1));
   }
 
 unique_ptr<EdgeMap> element2D::connectToRightBound()
   {
-    EdgeMap tmp(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
-    return make_unique<EdgeMap>(tmp);
+    return make_unique<EdgeMap>(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
   }
 
 unique_ptr<EdgeMap> element2D::connectToTopBound()
   {
-    EdgeMap tmp(itsU.data(),itsN+1,InnerStride<>(1));
-    return make_unique<EdgeMap>(tmp);
+    return make_unique<EdgeMap>(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
   }
 
 unique_ptr<EdgeMap> element2D::connectToBottomBound()
   {
-    EdgeMap tmp(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
-    return make_unique<EdgeMap>(tmp);
+    return make_unique<EdgeMap>(itsU.data(),itsN+1,InnerStride<>(itsN+1));
   }
 
 void element2D::setLeftEdge(edge2D* theLeftEdge)
@@ -100,10 +98,21 @@ void element2D::setU(const VectorXd &theU)
   }
 
 void element2D::advecRHS(const Vector2d a)
-  {/*
-    Vector2d du(-a*itsU[0]+itsLFlux*itsLNormal,a*itsU[itsN]-itsRFlux*itsRNormal);
+  {
+    VectorXd du((itsN+1)*4);
+    EdgeMap B(itsU.data(),itsN+1,InnerStride<>(itsN+1));
+    EdgeMap L(itsU.data(),itsN+1,InnerStride<>(1));
+    EdgeMap T(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
+    EdgeMap R(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
 
-    itsRHSU = -a/itsJ.array()*(globals::Dr*itsU).array() + (globals::Lift*du).array()/itsJ.array();*/
+    du << (L*a.transpose() - itsLeftFlux.transpose())*itsLeftNormal,
+          (T*a.transpose() - itsTopFlux.transpose())*itsTopNormal,
+          (R*a.transpose() - itsRightFlux.transpose())*itsRightNormal,
+          (B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal;
+
+    itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*(globals::Dr2D*itsU).array()-a[0]*itsDYDR.array()/(-itsJ.array())*(globals::Ds2D*itsU).array()
+              -a[1]*itsDXDS.array()/(-itsJ.array())*(globals::Dr2D*itsU).array()-a[1]*itsDXDR.array()/itsJ.array()*(globals::Ds2D*itsU).array()
+              +(globals::Lift2D*du).array()/itsJ.array();
   }
 
 void element2D::advecRK2D(const int INTRK, const double dt)

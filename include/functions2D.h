@@ -18,12 +18,14 @@
 
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
+#include <utility>
 #define EIGEN_MPL2_ONLY
 
 #ifndef FUNCTIONS2D_H
 #define FUNCTIONS2D_H
 
 using namespace Eigen;
+using namespace std;
 
 namespace functions2D{
 
@@ -50,6 +52,15 @@ SparseMatrix<double> DRMatrix2D(int N, const VectorXd& r, const VectorXd& s);
 
 // return Differentiation matrix/operator for the Nth order reference element
 SparseMatrix<double> DSMatrix2D(int N, const VectorXd& r, const VectorXd& s);
+
+// Transformed generic element locations x through affine mapping coordinates of r
+VectorXd LocalX2D(const ArrayXd& r, pair<double,double> BottomLeft, pair<double,double> TopRight);
+
+// Transformed generic element locations y through affine mapping coordinates of s
+VectorXd LocalY2D(const ArrayXd& s, pair<double,double> BottomLeft, pair<double,double> TopRight);
+
+// Surface integral operator of the Nth order reference element
+SparseMatrix<double> Lift2D(int N);
 
 }
 #endif

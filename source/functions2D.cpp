@@ -13,7 +13,6 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 using namespace Eigen;
@@ -89,7 +88,6 @@ VectorXd functions2D::GradSJacobiP2D(const VectorXd& r, const ArrayXd& s, int al
     ArrayXd jacobiPGradS = sqrt(M*(M+alpha+beta+1))*jacobiP(s,alpha+1,beta+1,M-1);
     ArrayXd jacobiPR = jacobiP(r,alpha,beta,N);
 
-
     // Tensor product of gradient polynomial in r and polynomial in s form 2D gradient in r of order N,M
     // polynomial 
     for (int i=0; i<r.size(); ++i)
@@ -106,7 +104,6 @@ VectorXd functions2D::GradSJacobiP2D(const VectorXd& r, const ArrayXd& s, int al
 
 MatrixXd functions2D::Vandermonde2D(int N, const VectorXd& r, const VectorXd& s)
 {
-
     MatrixXd V2D(r.size()*s.size(), (N+1)*(N+1));
     // Create Vandermonde matrix that contains the base functions of the reference element as columns
     //-------------------------------------------------------------------------------------------------------
@@ -166,21 +163,21 @@ SparseMatrix<double> functions2D::DRMatrix2D(int N, const VectorXd& r, const Vec
 
     // Make operator sparse
     //-------------------------------------------------------------------------------------------------------
-    vector<Triplet<double>> triplets;
     SparseMatrix<double> ret(S,S);
+    ret.reserve((N+1)*S);
 
     // Find non-zero entries
-    for (int i=0; i<S; ++i)
+    for (int i=0; i<N+1; ++i)
     {
-        for (int j=0; j<S; ++j)
+        for (int j=0; j<N+1; ++j)
         {
-            if(abs(Dr(i,j)) > epsilon) triplets.push_back(Triplet<double>(i,j,Dr(i,j)));
+            for (int k=0; k<N+1; ++k)
+            {
+                ret.insert(i*(N+1)+k, j*(N+1)+k) = Dr(i*(N+1)+k,j*(N+1)+k);//triplets.push_back(Triplet<double>(j,i,Ds(j,i)));
+            }
         }
     }
  
-    // Set sparse matrix values
-    ret.setFromTriplets(triplets.begin(),triplets.end());
-
     return ret;
     //-------------------------------------------------------------------------------------------------------
 }
@@ -196,20 +193,20 @@ SparseMatrix<double> functions2D::DSMatrix2D(int N, const VectorXd& r, const Vec
 
     // Make operator sparse
     //-------------------------------------------------------------------------------------------------------
-    vector<Triplet<double>> triplets;
     SparseMatrix<double> ret(S,S);
+    ret.reserve((N+1)*S);
 
     // Find non-zero entries
-    for (int i=0; i<S; ++i)
+    for (int k=0; k<N+1; ++k)
     {
-        for (int j=0; j<S; ++j)
+        for (int i=k*(N+1); i<(k+1)*(N+1); ++i)
         {
-            if(abs(Ds(i,j)) > epsilon) triplets.push_back(Triplet<double>(i,j,Ds(i,j)));
+            for (int j=k*(N+1); j<(k+1)*(N+1); ++j)
+            {
+                ret.insert(i,j) = Ds(i,j);//triplets.push_back(Triplet<double>(j,i,Ds(j,i)));
+            }
         }
     }
-
-    // Set sparse matrix values
-    ret.setFromTriplets(triplets.begin(),triplets.end());
 
     return ret;
     //-------------------------------------------------------------------------------------------------------
@@ -247,4 +244,51 @@ VectorXd functions2D::LocalY2D(const ArrayXd& s, pair<double,double> BottomLeft,
     }
 
     return ret;
+}
+
+SparseMatrix<double> functions2D::Lift2D(int N)
+{
+    ArrayXd r    = jacobiGL(0,0,N);
+    MatrixXd V1D = Vandermonde1D(N,r);
+    MatrixXd V2D = Vandermonde2D(N,r,r);
+    MatrixXd M   = (V1D*V1D.transpose()).inverse();
+
+    // Create operator for 2D surface flux integral on the reference element
+    //-------------------------------------------------------------------------------------------------------
+    MatrixXd Emat = MatrixXd::Zero((N+1)*(N+1),4*(N+1));
+
+
+    Map<MatrixXd,0,Stride<Dynamic,Dynamic>> Left(Emat.data(),N+1,N+1,Stride<Dynamic,Dynamic>((N+1)*(N+1),1));
+    Map<MatrixXd,0,Stride<Dynamic,Dynamic>> Top(Emat.data()+(N+1)*(N+1)*(N+1)+N,N+1,N+1,Stride<Dynamic,Dynamic>((N+1)*(N+1),N+1));
+    Map<MatrixXd,0,Stride<Dynamic,Dynamic>> Right(Emat.data()+2*(N+1)*(N+1)*(N+1)+N*(N+1),N+1,N+1,Stride<Dynamic,Dynamic>((N+1)*(N+1),1));
+    Map<MatrixXd,0,Stride<Dynamic,Dynamic>> Bottom(Emat.data()+3*(N+1)*(N+1)*(N+1),N+1,N+1,Stride<Dynamic,Dynamic>((N+1)*(N+1),N+1));
+
+    Left = M;
+    Top = M;
+    Right = M;
+    Bottom = M;
+
+    int R = (N+1)*(N+1);
+    int S = 4*(N+1);
+    auto tmp = V2D*(V2D.transpose()*Emat);
+
+    // Make operator sparse
+    //-------------------------------------------------------------------------------------------------------
+    SparseMatrix<double> ret(R,S);
+    ret.reserve(4*R);
+
+    // Find non-zero entries
+    for (int i=0; i<N+1; ++i)
+    {
+        for (int k=0; k<N+1; ++k)
+        {
+            ret.insert(i*(N+1)+k,k) = tmp(i*(N+1)+k,k);
+            ret.insert(i*(N+1)+k,i+N+1) = tmp(i*(N+1)+k,i+N+1);
+            ret.insert(i*(N+1)+k,k+2*(N+1)) = tmp(i*(N+1)+k,k+2*(N+1));
+            ret.insert(i*(N+1)+k,i+3*(N+1)) = tmp(i*(N+1)+k,i+3*(N+1));
+        }
+    }
+
+    return ret;
+    //-------------------------------------------------------------------------------------------------------
 }

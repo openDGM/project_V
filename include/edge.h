@@ -5,7 +5,6 @@
  *  v. 2.0.
  */
 
-
 /*
  * Description:
  * The edge class is used to solve the
@@ -50,22 +49,23 @@ class edge
 class edge2D
 {
     private:
-    VectorXd itsFlux;
+    MatrixXd itsFlux2D;
     unique_ptr<EdgeMap> itsLValue;
     unique_ptr<EdgeMap> itsRValue;
 
-    Vector2d itsNormal;
+    Vector2d itsLNormal;
+    Vector2d itsRNormal;
 
     public:
     edge2D();
 
     // Construct a new edge from map to left and right value and a edge normal
-    edge2D(unique_ptr<EdgeMap> theLValue, unique_ptr<EdgeMap> theRValue, Vector2d theNormal);
+    edge2D(unique_ptr<EdgeMap> theLValue, unique_ptr<EdgeMap> theRValue, Vector2d theLNormal, Vector2d theRNormal);
 
     // Solve Riemann problem at the edge
-    void evaluateFlux(const Vector2d a);
+    void evaluateFlux2D(const Vector2d a);
 
     // Return flux
-    VectorXd Flux(Vector2d theNormal);
+    MatrixXd Flux2D();
 };
 #endif 

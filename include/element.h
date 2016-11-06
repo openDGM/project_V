@@ -82,7 +82,7 @@ class element2D
   edge2D*   itsTopEdge;
   edge2D*   itsBottomEdge;
 
-  VectorXd  itsLeftFlux,itsRightFlux,itsTopFlux,itsBottomFlux;
+  MatrixXd  itsLeftFlux,itsRightFlux,itsTopFlux,itsBottomFlux;
   pair<double,double> itsBottomLeft, itsBottomRight, itsTopLeft, itsTopRight;
   Vector2d  itsLeftNormal, itsRightNormal, itsTopNormal, itsBottomNormal;
 
@@ -95,6 +95,7 @@ class element2D
   VectorXd itsDXDS;                // dxds Jacobian of the nodal element
   VectorXd itsDYDR;                // dydr Jacobian of the nodal element
   VectorXd itsDYDS;                // dyds Jacobian of the nodal element
+  VectorXd itsJ;                   // Jacobian dxdr*dyds-dxds*dydr
 
   public:
   element2D ();

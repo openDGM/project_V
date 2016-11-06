@@ -6,6 +6,7 @@
  */
 
 #include <Eigen/Dense>
+#include <Eigen/SparseCore>
 #define EIGEN_MPL2_ONLY
 
 #ifndef GLOBALS_H
@@ -15,6 +16,8 @@ using namespace Eigen;
 
 namespace globals 
 {
+  typedef Map<VectorXd,0,InnerStride<>> EdgeMap;
+
   extern MatrixXd V;           // Vandermonde matrix
   extern MatrixXd invV;        // Inverse Vandermonde matrix
   extern MatrixXd DVr;         // Vandermonde gradient matrix
@@ -23,7 +26,9 @@ namespace globals
 
   extern MatrixXd V2D;
   extern MatrixXd DVs;
-  extern MatrixXd Ds;
+  extern SparseMatrix<double> Dr2D;
+  extern SparseMatrix<double> Ds2D;
+  extern SparseMatrix<double> Lift2D;
 
   // 4th order Runge-Kutta coefficients
   const double rk4a[5] = {0.0,
