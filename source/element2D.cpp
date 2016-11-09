@@ -104,18 +104,15 @@ void element2D::advecRHS(const Vector2d a)
     EdgeMap L(itsU.data(),itsN+1,InnerStride<>(1));
     EdgeMap T(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
     EdgeMap R(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
-
+// todo, maybe top/bottom flux have to switch
     du << (L*a.transpose() - itsLeftFlux.transpose())*itsLeftNormal,
-          (T*a.transpose() - itsTopFlux.transpose())*itsTopNormal,
+          (B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal,
           (R*a.transpose() - itsRightFlux.transpose())*itsRightNormal,
-          (B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal;
+          (T*a.transpose() - itsTopFlux.transpose())*itsTopNormal;
 
-    /*itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*(globals::Dr2D*itsU).array()-a[0]*itsDYDR.array()/(-itsJ.array())*(globals::Ds2D*itsU).array()
-              -a[1]*itsDXDS.array()/(-itsJ.array())*(globals::Dr2D*itsU).array()-a[1]*itsDXDR.array()/itsJ.array()*(globals::Ds2D*itsU).array()
-              +(globals::Lift2D*du).array()/itsJ.array();*/
     itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*operators2D::DDr(itsN,itsU)-a[0]*itsDYDR.array()/(-itsJ.array())*operators2D::DDs(itsN,itsU)
               -a[1]*itsDXDS.array()/(-itsJ.array())*operators2D::DDr(itsN,itsU)-a[1]*itsDXDR.array()/itsJ.array()*operators2D::DDs(itsN,itsU)
-              +(globals::Lift2D*du).array()/itsJ.array();
+              +operators2D::Lift2D(itsN,du)/itsJ.array();
 
   }
 

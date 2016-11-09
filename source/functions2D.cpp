@@ -173,7 +173,7 @@ SparseMatrix<double> functions2D::DRMatrix2D(int N, const VectorXd& r, const Vec
         {
             for (int k=0; k<N+1; ++k)
             {
-                ret.insert(i*(N+1)+k, j*(N+1)+k) = Dr(i*(N+1)+k,j*(N+1)+k);//triplets.push_back(Triplet<double>(j,i,Ds(j,i)));
+                ret.insert(i*(N+1)+k, j*(N+1)+k) = Dr(i*(N+1)+k,j*(N+1)+k);
             }
         }
     }
@@ -203,7 +203,7 @@ SparseMatrix<double> functions2D::DSMatrix2D(int N, const VectorXd& r, const Vec
         {
             for (int j=k*(N+1); j<(k+1)*(N+1); ++j)
             {
-                ret.insert(i,j) = Ds(i,j);//triplets.push_back(Triplet<double>(j,i,Ds(j,i)));
+                ret.insert(i,j) = Ds(i,j);
             }
         }
     }

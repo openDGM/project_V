@@ -29,9 +29,19 @@ typedef Map<VectorXd,0,InnerStride<>> EdgeMap;
 namespace operators2D{
 
 // Partial derivative in r direction for rectangular element
-ArrayXd DDr(int N, ArrayXd& U);
+ArrayXd DDr(int N, VectorXd& U);
+
+// Partial derivative in r direction for rectangular element
+ArrayXd DDr(int N, const vector<EdgeMap>& U);
 
 // Partial derivative in s direction for rectangular element
-ArrayXd DDs(int N, ArrayXd& U);
+ArrayXd DDs(int N, VectorXd& U);
+
+// Partial derivative in s direction for rectangular element
+ArrayXd DDs(int N, const vector<EdgeMap>& U);
+
+// Element surface flux integral operator
+ArrayXd Lift2D(int N, VectorXd& dU);
+
 }
 #endif

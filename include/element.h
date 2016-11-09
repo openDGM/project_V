@@ -14,6 +14,7 @@
  */
 
 #include "edge.h"
+#include "operators2D.h"
 #include <Eigen/Dense>
 #define EIGEN_MPL2_ONLY
 
