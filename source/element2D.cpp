@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "functions1D.h"
 #include "functions2D.h"
-#include <iostream>
 
 using namespace Eigen;
 using namespace globals;
@@ -104,15 +103,17 @@ void element2D::advecRHS(const Vector2d a)
     EdgeMap L(itsU.data(),itsN+1,InnerStride<>(1));
     EdgeMap T(itsU.data()+itsN,itsN+1,InnerStride<>(itsN+1));
     EdgeMap R(itsU.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
-// todo, maybe top/bottom flux have to switch
-    du << (L*a.transpose() - itsLeftFlux.transpose())*itsLeftNormal,
-          (B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal,
-          (R*a.transpose() - itsRightFlux.transpose())*itsRightNormal,
-          (T*a.transpose() - itsTopFlux.transpose())*itsTopNormal;
+
+    EdgeMap JJ(itsJ.data()+itsN*(itsN+1),itsN+1,InnerStride<>(1));
+
+    du << ((L*a.transpose() - itsLeftFlux.transpose())*itsLeftNormal).array()/sqrt(JJ.array())/2,
+          ((B*a.transpose() - itsBottomFlux.transpose())*itsBottomNormal).array()/sqrt(JJ.array())/2,
+          ((R*a.transpose() - itsRightFlux.transpose())*itsRightNormal).array()/sqrt(JJ.array())/2,
+          ((T*a.transpose() - itsTopFlux.transpose())*itsTopNormal).array()/sqrt(JJ.array())/2;
 
     itsRHSU = -a[0]*itsDYDS.array()/itsJ.array()*operators2D::DDr(itsN,itsU)-a[0]*itsDYDR.array()/(-itsJ.array())*operators2D::DDs(itsN,itsU)
               -a[1]*itsDXDS.array()/(-itsJ.array())*operators2D::DDr(itsN,itsU)-a[1]*itsDXDR.array()/itsJ.array()*operators2D::DDs(itsN,itsU)
-              +operators2D::Lift2D(itsN,du)/itsJ.array();
+              +operators2D::Lift2D(itsN,du);
 
   }
 

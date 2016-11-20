@@ -9,7 +9,7 @@
  * Description:
  * Operators than can be applied to an 2D element data
  *
- * N : refers to the order of the polynomial in first dimension
+ * N : refers to the order of the polynomial 
  
  */
 

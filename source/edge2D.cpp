@@ -21,7 +21,7 @@ edge2D::edge2D(unique_ptr<EdgeMap> theLValue, unique_ptr<EdgeMap> theRValue, Vec
 
 void edge2D::evaluateFlux2D(const Vector2d a)
 {
-    double alpha = 0; //upwind flux
+    double alpha = 1; //upwind flux
 
     auto mean = a*(*itsLValue + *itsRValue).transpose()/2;
     auto jump = abs(a.transpose()*itsLNormal)*(itsLNormal*itsLValue->transpose()+itsRNormal*itsRValue->transpose())*(1-alpha)/2;

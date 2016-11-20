@@ -29,16 +29,16 @@ typedef Map<VectorXd,0,InnerStride<>> EdgeMap;
 class element
 {
   private:
-  int       itsN;                  // polynomial order of the nodal element
-  edge*     itsLEdge;              // left element boundary edge
-  edge*     itsREdge;              // right element boundary edge
-  double    itsLFlux,itsRFlux;     // element boundary fluxes
-  double    itsXLeft,itsXRight;    // element boundary coordinates
-  double    itsLNormal,itsRNormal; // boundary normal vectors
+  int       itsN;                  // Polynomial order of the nodal element
+  edge*     itsLEdge;              // Left element boundary edge
+  edge*     itsREdge;              // Right element boundary edge
+  double    itsLFlux,itsRFlux;     // Element boundary fluxes
+  double    itsXLeft,itsXRight;    // Element boundary coordinates
+  double    itsLNormal,itsRNormal; // Boundary normal vectors
   
-  VectorXd itsU;                   // solution of the nodal element
-  VectorXd itsX;                   // global coordinates of the nodal element
-  VectorXd itsRHSU;                // right hand side of PDE
+  VectorXd itsU;                   // Solution of the nodal element
+  VectorXd itsX;                   // Gglobal coordinates of the nodal element
+  VectorXd itsRHSU;                // Right hand side of PDE
   VectorXd itsRESU;                // Runge-Kutta residual
   VectorXd itsJ;                   // Jacobian of the nodal element
 
@@ -59,12 +59,12 @@ class element
   // Return a pointer to rightmost value of solution vector itsU
   double* connectToRightBound();
 
-  // set pointer to object of type edge to the left of element
+  // Set pointer to object of type edge to the left of element
   void setLEdge(edge* theLEdge);
-  // set pointer to object of type edge to the right of element
+  // Set pointer to object of type edge to the right of element
   void setREdge(edge* theREdge);
 
-  // set initial condition
+  // Set initial condition
   void setU(const VectorXd &theU);
 
   // Return solution
@@ -77,20 +77,25 @@ class element
 class element2D
 {
   private:
-  int       itsN;
-  edge2D*   itsLeftEdge;
-  edge2D*   itsRightEdge;
-  edge2D*   itsTopEdge;
-  edge2D*   itsBottomEdge;
+  int       itsN;                  // Polynomial order of the nodal element
+  edge2D*   itsLeftEdge;           // Left edge of the element
+  edge2D*   itsRightEdge;          // Right edge of the element
+  edge2D*   itsTopEdge;            // Top edge of the element
+  edge2D*   itsBottomEdge;         // Bottom edge of the element
 
+  // Element boundry fluxes
   MatrixXd  itsLeftFlux,itsRightFlux,itsTopFlux,itsBottomFlux;
+
+  // Element corner coordinates
   pair<double,double> itsBottomLeft, itsBottomRight, itsTopLeft, itsTopRight;
+
+  // Element normals
   Vector2d  itsLeftNormal, itsRightNormal, itsTopNormal, itsBottomNormal;
 
-  VectorXd itsU;                   // solution of the nodal element
-  VectorXd itsX;                   // global coordinates of the nodal element
-  VectorXd itsY;
-  VectorXd itsRHSU;                // right hand side of PDE
+  VectorXd itsU;                   // Solution of the nodal element
+  VectorXd itsX;                   // Global X coordinates of the nodal element
+  VectorXd itsY;                   // Global Y coordinates of the nodal element
+  VectorXd itsRHSU;                // Right hand side of PDE
   VectorXd itsRESU;                // Runge-Kutta residual
   VectorXd itsDXDR;                // dxdr Jacobian of the nodal element
   VectorXd itsDXDS;                // dxds Jacobian of the nodal element
@@ -100,30 +105,44 @@ class element2D
 
   public:
   element2D ();
+  // Construct a new element from corner coordinates, normals and polynomial order
   element2D (pair<double,double> theBottomLeft, pair<double,double> theBottomRight, 
              pair<double,double> theTopLeft, pair<double,double> theTopRight, 
              Vector2d theLeftNormal, Vector2d theRightNormal, 
              Vector2d theTopNormal, Vector2d theBottomNormal, 
              int theN);
 
+  // Update flux values at the boundaries
   void updateFluxes();
+
+  // Compute right hand side of the PDE
   void advecRHS(const Vector2d a);
+
+  // Integrate solution in time by one RK step
   void advecRK2D(const int INTRK, const double dt);
 
+  // Create pointers to boundary values of the element
   unique_ptr<EdgeMap> connectToLeftBound();
   unique_ptr<EdgeMap> connectToRightBound();
   unique_ptr<EdgeMap> connectToTopBound();
   unique_ptr<EdgeMap> connectToBottomBound();
 
+  // Set pointers to the edges around the element
   void setLeftEdge(edge2D* theLeftEdge);
   void setRightEdge(edge2D* theRightEdge);
   void setTopEdge(edge2D* theTopEdge);
   void setBottomEdge(edge2D* theBottomEdge);
 
+  // Set initial condition for U
   void setU(const VectorXd &theU);
 
+  // Return solution
   VectorXd getU();
+
+  // Return X-grid
   VectorXd getX();
+
+  // Return Y-grid
   VectorXd getY();
 
 };

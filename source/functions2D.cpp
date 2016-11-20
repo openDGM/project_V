@@ -19,6 +19,11 @@ using namespace Eigen;
 using namespace functions1D;
 using namespace functions2D;
 
+//===========================================================================================================
+// Due to expensive sparse matrix creation operation in Eigen these functions are not actively used at the
+// moment but will remain here as they might be useful at later stages.
+//===========================================================================================================
+
 ArrayXd functions2D::jacobiP2D(const ArrayXd& r, const ArrayXd& s, int alpha, int beta, int N, int M)
 {
     // 2D Jacobi polynomial constructed from orthorgonal 1D Jacobi polynomials

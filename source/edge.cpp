@@ -18,7 +18,7 @@ edge::edge(double* theLValue, double* theRValue, double theNormal) : itsLValue(t
 
 void edge::evaluateFlux(const double a)
 {
-  double alpha = 1; //upwind flux
+  double alpha = 0; //upwind flux
   itsFlux = a*(*itsLValue + *itsRValue)/2 + std::abs(a)*(1-alpha)/double(2)*(*itsLValue*itsNormal - *itsRValue*itsNormal);
 }
 
